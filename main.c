@@ -57,7 +57,8 @@ typedef struct s_mystruct
 
 
 void    my_pixel_put_to_image(t_img *myimg, int x, int y, int color);
-void draw_fractal(t_img *myimg, int x, int y, float h);
+void draw_fractal(t_img *myimg, float x, float y, float h, int ite);
+int motion(int x, int y, t_struct *mystruct);
 
 void ft_putchar(char c)
 {
@@ -143,48 +144,115 @@ void    draw_line_on_img(t_img *myimg, t_temp *temp, int color)
 
 int             event_mlx(int keycode, t_struct *mystruct)
 {
-  static int ite;
+  /*  static float xv;
+  static float yv;
 
-  if(!ite)
-    ite = 50;
-
+  if(!xv)
+    xv = 0.4;
+  if(!yv)
+    yv = 0.2;
+  */
   if (keycode == 53)
-    exit(1);/*
-  if(keycode == 126)
+    exit(1);
+  /*if(keycode == 123)
     {
-      ite += 10;
       mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
       mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, 1500, 1500);
-      draw_fractal(mystruct->img, ite);
+      draw_fractal(mystruct->img, xv, yv, 1, ite);
       mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
-      mlx_key_hook(mystruct->win, event_mlx, mystruct);
     }
-  if(keycode == 125)
+  if(keycode == 124)
     {
-      ite -= 10;
-      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
-      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, 1500, 1500);
-      draw_fractal(mystruct->img, ite);
-      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
-      mlx_key_hook(mystruct->win, event_mlx, mystruct);
-      }*/
+     
+    }*/
   return (0);
 }
 
 int mouse_mlx(int button, int x, int y, t_struct *mystruct)
 {
   static int h;
+  static int ite;
 
+  if(!ite)
+    ite = 100;
   if(!h)
     h = 1;
-  if(button == 1)
+  /*if(button == 1)
     {
+     
       mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
       mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, 1500, 1500);
-      draw_fractal(mystruct->img, x, y, h);
+      draw_fractal(mystruct->img, xv, yv, h, ite);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+      mlx_mouse_hook (mystruct->win, mouse_mlx, mystruct);
+      }*/
+
+  if(button == 4)
+    {
+      ite -= 3;
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, 1500, 1500);
+      draw_fractal(mystruct->img, 0.5, 0.5, h, ite);
       mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
       mlx_mouse_hook (mystruct->win, mouse_mlx, mystruct);
     }
+  if(button == 2)
+    {
+      ite += 3;
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, 1500, 1500);
+      draw_fractal(mystruct->img, 0.5, 0.5, h, ite);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+      mlx_mouse_hook (mystruct->win, mouse_mlx, mystruct);
+    }
+  return (0);
+}
+
+int motion(int x, int y, t_struct *mystruct)
+{
+  static int xp;
+  static int yp;
+  static float xv;
+  static float yv;
+
+  if(!xv)
+    xv = 0.5;
+  if(!yv)
+    yv = 0.5;
+  if(!xp)
+    xp = x;
+  if(!yp)
+    yp = y;
+
+  if(x < xp)
+    {
+      xv -= 0.1;
+
+    }
+  else
+    {
+      xv += 0.1;
+
+    }
+  if(y < yp)
+    {
+
+      yv -= 0.1;
+    }
+  else
+    {
+
+      yv += 0.1;
+    }
+
+  xp = x;
+  yp = y;
+  //rebouger
+  mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+  mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, 1500, 1500);
+  draw_fractal(mystruct->img, xv, yv, 1, 100);
+  mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+  mlx_mouse_hook (mystruct->win, mouse_mlx, mystruct); 
   return (0);
 }
 
@@ -230,14 +298,14 @@ int ok_draw(int x, int y)
   return (0);
 }
 
-void draw_fractal(t_img *myimg, int x, int y, float h)
+void draw_fractal(t_img *myimg, float x, float y, float h, int ite)
 {
-  float x1 = -2.1;// x - h;
-  float x2 = 0.6;//x + h;//0.6;
-  float y1 = -1.2;//y - h;
-  float y2 = 1.2;//y + h;//1.2;
-  float zoom = 750;
-  float max_ite = 50;//detaille
+  float x1 = -x - 1;
+  float x2 = x + 1;//0.6;
+  float y1 = -y - 1;
+  float y2 = y + 1;//1.2;
+  float zoom = 300;
+  float max_ite = ite;//detaille
   float image_x = (x2 - x1) * zoom;
   float image_y = (y2 - y1) * zoom;
 
@@ -261,12 +329,12 @@ void draw_fractal(t_img *myimg, int x, int y, float h)
 	  if(i == max_ite)
 	    {
 	      if(ok_draw(x,y) == 1)
-		my_pixel_put_to_image(myimg, x, y, 0x000000);
+		my_pixel_put_to_image(myimg, x + 250, y + 200, 0x000000);
 	    }
 	  else
 	    {
 	      if(ok_draw(x,y) == 1)
-		my_pixel_put_to_image(myimg, x, y, RGB(0, 0, i*255/max_ite));
+		my_pixel_put_to_image(myimg, x + 250, y + 200, RGB(0, 0, i*255/max_ite));
 	    }
 	}
     }
@@ -292,10 +360,11 @@ int             main(int argc, char **argv)
   //draw_line_on_img(myimg, temp, 0xFF0000);
   //color_img(myimg);
   mystruct->img = myimg;
-  draw_fractal(myimg, 1, 1, 1.2);
+  draw_fractal(myimg, 0.5, 0.5, 1, 100);
   mlx_put_image_to_window(mystruct->mlx, mystruct->win, myimg->img_ptr, 0, 0);
   mlx_key_hook(mystruct->win, event_mlx, mystruct);
   mlx_mouse_hook (mystruct->win, mouse_mlx, mystruct);
+  mlx_hook(mystruct->win, 6, (1L<<6),motion, mystruct);
   mlx_loop(mystruct->mlx);
   return (0);
 }
